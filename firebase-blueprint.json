@@ -1,0 +1,86 @@
+{
+  "collections": [
+    {
+      "name": "users",
+      "documentId": "uid",
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "email", "type": "string" },
+        { "name": "role", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ],
+      "access": "Users can read/write their own profile. Admins can read all."
+    },
+    {
+      "name": "products",
+      "documentId": "auto",
+      "fields": [
+        { "name": "title", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "category", "type": "string" },
+        { "name": "price", "type": "number" },
+        { "name": "thumbnailUrl", "type": "string" },
+        { "name": "downloadUrl", "type": "string" },
+        { "name": "features", "type": "array" },
+        { "name": "createdAt", "type": "timestamp" }
+      ],
+      "access": "Anyone can read products. Admins can write."
+    },
+    {
+      "name": "orders",
+      "documentId": "auto",
+      "fields": [
+        { "name": "userId", "type": "string" },
+        { "name": "products", "type": "array" },
+        { "name": "totalAmount", "type": "number" },
+        { "name": "status", "type": "string" },
+        { "name": "paymentMethod", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ],
+      "access": "Users can read/create their own orders. Admins can read/update all."
+    },
+    {
+      "name": "custom_requests",
+      "documentId": "auto",
+      "fields": [
+        { "name": "userId", "type": "string" },
+        { "name": "projectType", "type": "string" },
+        { "name": "budget", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "status", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ],
+      "access": "Users can read/create their own requests. Admins can read/update all."
+    },
+    {
+      "name": "system_config",
+      "documentId": "admin_settings",
+      "fields": [
+        { "name": "secretKey", "type": "string" },
+        { "name": "paymentAccountNumber", "type": "string" },
+        { "name": "paymentAccountTitle", "type": "string" },
+        { "name": "paymentMethodName", "type": "string" },
+        { "name": "paymentMethodLogoText", "type": "string" },
+        { "name": "paymentMethodLogoUrl", "type": "string" },
+        { "name": "updatedAt", "type": "string" },
+        { "name": "updatedBy", "type": "string" }
+      ],
+      "access": "Admins and authenticating managers can read and update security configuration."
+    },
+    {
+      "name": "admins",
+      "documentId": "auto",
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "email", "type": "string" },
+        { "name": "secretKey", "type": "string" },
+        { "name": "role", "type": "string" },
+        { "name": "permissions", "type": "array" },
+        { "name": "status", "type": "string" },
+        { "name": "lastSeen", "type": "string" },
+        { "name": "createdAt", "type": "string" }
+      ],
+      "access": "Admins directory and permissions management."
+    }
+  ]
+}

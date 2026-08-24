@@ -1,0 +1,12 @@
+{
+  "projectId": "ecomeerce-web",
+  "appId": "1:248336117130:web:30f05b8dde806331cfec73",
+  "apiKey": "AIzaSyAR1a0VUgOY6RTfHCRD2LnH1gWYqBqdbII",
+  "authDomain": "ecomeerce-web.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "ecomeerce-web.firebasestorage.app",
+  "messagingSenderId": "248336117130",
+  "measurementId": "",
+  "oAuthClientId": "248336117130-fru7lb2rj2l2oh3clq2trjgdvhfga9av.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
+}

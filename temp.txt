@@ -1,0 +1,231 @@
+                          const isReceiptExpanded = expandedOrderId === order._id;
+
+                          const subtotal = order.totalAmount;
+
+                          return (
+                            <div key={order._id} className="bg-[#0b0c13]/90 border border-[#202234] rounded-[24px] p-6 space-y-5 transition-all duration-300 relative overflow-hidden shadow-[0_4px_25px_rgba(139,92,246,0.02)] hover:border-[#8b5cf6]/40 text-left">
+                              {/* Top row matching image.png */}
+                              <div className="flex justify-between items-start gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] text-gray-500 font-extrabold uppercase tracking-widest block font-mono">Order ID</span>
+                                  <h3 className="text-lg font-black text-white tracking-tight">
+                                    #NEX-{order._id.slice(0, 7).toUpperCase()}
+                                  </h3>
+                                  <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium pt-0.5">
+                                    <Clock className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                                    <span>
+                                      {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(order.createdAt))} at {new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(order.createdAt))}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Custom status pill matching image.png */}
+                                <span className={`px-4 py-1.5 rounded-xl border text-[11px] font-black uppercase tracking-widest select-none ${
+                                  isApproved 
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                                    : isPending 
+                                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' 
+                                      : 'bg-red-500/10 border-red-500/30 text-red-400'
+                                }`}>
+                                  {isApproved ? 'Approved' : isPending ? 'Pending' : 'Rejected'}
+                                </span>
+                              </div>
+
+                              {/* Order Items Heading and nested block */}
+                              <div className="pt-2">
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className="text-xs font-black text-gray-300 uppercase tracking-wider block">Order Items</h4>
+                                  <span className="text-[10px] text-gray-500 font-mono">Click any item or image to inspect details</span>
+                                </div>
+                                
+                                <div className="bg-[#07080d]/80 border border-[#161726] rounded-2xl p-4 divide-y divide-[#161726]/40">
+                                  {order.products.map((prod) => (
+                                    <div key={prod._id} className="py-3.5 first:pt-0 last:pb-0 group">
+                                      <div className="flex items-start gap-3.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedProductForModal(prod);
+                                            setModalActiveImageIndex(0);
+                                          }}
+                                          className="w-14 h-14 rounded-xl bg-[#11121d] border border-[#202235]/80 overflow-hidden shrink-0 shadow-md flex items-center justify-center relative cursor-pointer group-hover:border-[#8b5cf6]/70 transition-all mt-0.5"
+                                          title="Click to view product images & description"
+                                        >
+                                          {prod.image ? (
+                                            <img src={prod.image} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                          ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-[#151624] text-[#a78bfa]">
+                                              <Package className="w-5 h-5" />
+                                            </div>
+                                          )}
+                                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <Eye className="w-4 h-4 text-white" />
+                                          </div>
+                                        </button>
+                                        <div className="text-left flex-1 min-w-0">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setSelectedProductForModal(prod);
+                                              setModalActiveImageIndex(0);
+                                            }}
+                                            className="font-extrabold text-white text-[13.5px] tracking-wide leading-snug hover:text-[#a78bfa] transition-colors text-left block cursor-pointer break-words"
+                                          >
+                                            {prod.title}
+                                          </button>
+                                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                            <span className="text-[11px] text-gray-500 font-medium">{prod.category}</span>
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setSelectedProductForModal(prod);
+                                                setModalActiveImageIndex(0);
+                                              }}
+                                              className="text-[10px] text-[#a78bfa] hover:text-[#c084fc] font-semibold flex items-center gap-1 cursor-pointer bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 px-2 py-0.5 rounded-md border border-[#8b5cf6]/20 transition-colors"
+                                            >
+                                              <Sparkles className="w-2.5 h-2.5" />
+                                              <span>View Details & Images</span>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Product Amount Bar at the bottom like a button */}
+                                      <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-[#161726]/60">
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[10px] text-gray-400 font-mono">Quantity:</span>
+                                          <span className="text-[11px] font-bold text-white bg-[#141524] px-2 py-0.5 rounded border border-[#222438]">1 item</span>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedProductForModal(prod);
+                                            setModalActiveImageIndex(0);
+                                          }}
+                                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#121320] border border-[#2b2e48] hover:border-[#8b5cf6]/60 text-white font-mono text-xs shadow-sm transition-colors cursor-pointer group/btn"
+                                        >
+                                          <span className="text-[10px] text-gray-400 font-semibold uppercase">Product Price:</span>
+                                          <span className="font-black text-[#a78bfa] group-hover/btn:text-[#c084fc] text-[13px]">
+                                            {formatCurrency(prod.price ? prod.price : order.totalAmount)}
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Math summary structure exactly like image.png */}
+                              <div className="flex flex-col items-end pt-1 space-y-1.5 text-xs">
+                                <div className="w-full sm:max-w-[280px] space-y-2 border-t border-[#161726]/60 pt-2.5 mt-1.5">
+                                  <div className="flex justify-between text-white">
+                                    <span className="font-extrabold text-white text-sm">Total</span>
+                                    <span className="text-[#a78bfa] font-black text-base font-mono">${order.totalAmount.toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Purple Action button matching screenshot */}
+                              <div className="pt-2">
+                                <Button 
+                                  onClick={() => setExpandedOrderId(isReceiptExpanded ? null : order._id)}
+                                  className="w-full bg-[#5c44e4] hover:bg-[#4a34c4] text-white font-extrabold uppercase py-3.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(92,68,228,0.25)] text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                  <span>{isReceiptExpanded ? "Hide Transaction Details" : "View Transaction Receipt"}</span>
+                                  <ChevronRight className={`w-4 h-4 transition-transform ${isReceiptExpanded ? 'rotate-90' : ''}`} />
+                                </Button>
+                              </div>
+
+                              {/* Collapsible details with ticket-styled receipt summary and download hub */}
+                              <AnimatePresence>
+                                {isReceiptExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="bg-[#07080d] border border-[#161726] rounded-2xl p-5 space-y-4 text-xs mt-3 relative">
+                                      {/* Ticket stub punch holes */}
+                                      <div className="relative my-1 border-t-2 border-dashed border-[#1c1d2e] py-1">
+                                        <div className="absolute -left-7 -top-2 w-4 h-4 bg-[#06070c] rounded-full border border-r-[#1c1d2e]" />
+                                        <div className="absolute -right-7 -top-2 w-4 h-4 bg-[#06070c] rounded-full border border-l-[#1c1d2e]" />
+                                      </div>
+
+                                      {/* Download Buttons / Actions for Product Assets */}
+                                      <div className="space-y-2.5">
+                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block font-mono">Product Delivery Hub</span>
+                                        {order.products.map((prod) => (
+                                          <div key={prod._id} className="bg-[#0b0c13] p-3.5 rounded-xl border border-[#161726] flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3.5 text-left">
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedProductForModal(prod);
+                                                  setModalActiveImageIndex(0);
+                                                }}
+                                                className="w-11 h-11 rounded-lg bg-[#141524] border border-[#24263a] overflow-hidden shrink-0 cursor-pointer hover:border-[#8b5cf6]/60 transition-colors"
+                                                title="Click to view images and details"
+                                              >
+                                                <img src={prod.image || ASSETS.ecommercePhones} alt="" className="w-full h-full object-cover" />
+                                              </button>
+                                              <div>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {
+                                                    setSelectedProductForModal(prod);
+                                                    setModalActiveImageIndex(0);
+                                                  }}
+                                                  className="font-extrabold text-white text-xs block hover:text-[#a78bfa] transition-colors text-left cursor-pointer"
+                                                >
+                                                  {prod.title}
+                                                </button>
+                                                <span className="text-[9px] text-gray-400 font-mono">Production Release {prod.version || "v1.0.0"}</span>
+                                              </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 shrink-0">
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedProductForModal(prod);
+                                                  setModalActiveImageIndex(0);
+                                                }}
+                                                className="border border-[#1a1b2b] text-gray-300 bg-[#0c0d16] hover:bg-[#1a1b2e] hover:text-white h-8 text-[10px] font-bold uppercase px-3.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors"
+                                              >
+                                                <Eye className="w-3.5 h-3.5 text-[#a78bfa]" />
+                                                <span>Images & Details</span>
+                                              </button>
+
+                                              {isApproved ? (
+                                                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-lg font-bold uppercase tracking-wider">
+                                                  Approved
+                                                </span>
+                                              ) : isPending ? (
+                                                <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3.5 py-1.5 rounded-lg font-bold uppercase tracking-wider flex items-center gap-1">
+                                                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                  <span>Pending</span>
+                                                </span>
+                                              ) : (
+                                                <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-3.5 py-1.5 rounded-lg font-bold uppercase tracking-wider flex items-center gap-1">
+                                                  <X className="w-3.5 h-3.5 shrink-0" />
+                                                  <span>Rejected</span>
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      {/* Verified Payment Status box */}
+                                      <div className="pt-1">
+                                        <div className="bg-[#0b0c13] p-4 rounded-xl border border-[#161726] flex items-center justify-between">
+                                          <span className="text-gray-400 font-bold uppercase tracking-wider text-[11px]">Payment Paid Status</span>
+                                          <span className="text-[#a78bfa] font-black text-sm">${order.totalAmount.toFixed(2)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>

@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Provision admins manually at /admins/{FirebaseAuthUID} in Firestore.
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function unchanged(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Storefront reads this public document. Keep API keys in server environment variables.
+    match /public_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin documents are authorized by a trusted Firebase admin claim.
+    match /admins/{adminUid} {
+      allow read: if isAdmin() || isOwner(adminUid);
+      allow write: if isAdmin();
+    }
+
+    match /users/{userUid} {
+      allow read: if isAdmin() || isOwner(userUid);
+      allow create: if isOwner(userUid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'user';
+      allow update: if isAdmin() || (
+        isOwner(userUid)
+        && unchanged('uid')
+        && unchanged('role')
+        && unchanged('status')
+        && unchanged('banReason')
+        && unchanged('createdAt')
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /product_secrets/{productId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'Pending';
+      allow update, delete: if isAdmin();
+    }
+
+    match /custom_requests/{requestId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /support_chat_io/{chatUid} {
+      allow read, write: if isAdmin() || isOwner(chatUid);
+
+      match /messages/{messageId} {
+        allow read, write: if isAdmin() || isOwner(chatUid);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

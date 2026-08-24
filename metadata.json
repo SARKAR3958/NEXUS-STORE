@@ -1,0 +1,6 @@
+{
+  "name": "Nexus Store",
+  "description": "A premium platform to buy and sell digital assets, applications, and source codes with a powerful real-time Firestore admin panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
