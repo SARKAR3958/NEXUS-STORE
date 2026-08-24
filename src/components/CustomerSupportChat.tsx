@@ -74,8 +74,6 @@ export function CustomerSupportChat() {
   const [aiMessages, setAiMessages] = useState<Message[]>([]);
 
   // AI Config & Payment states loaded from Firestore
-  const [aiApiKey, setAiApiKey] = useState('');
-  const [openRouterApiKey, setOpenRouterApiKey] = useState('');
   const [aiKnowledge, setAiKnowledge] = useState('');
   const [paymentDetails, setPaymentDetails] = useState({
     paymentMethodName: 'SadaPay',
@@ -108,8 +106,6 @@ export function CustomerSupportChat() {
         const snap = await getDoc(doc(db, 'public_settings', 'storefront'));
         if (snap.exists()) {
           const data = snap.data();
-          if (data.aiAssistantApiKey) setAiApiKey(data.aiAssistantApiKey);
-          if (data.openRouterApiKey) setOpenRouterApiKey(data.openRouterApiKey);
           if (data.aiCustomKnowledge) setAiKnowledge(data.aiCustomKnowledge);
           setPaymentDetails({
             paymentMethodName: data.paymentMethodName || 'SadaPay',
@@ -198,35 +194,49 @@ export function CustomerSupportChat() {
     setIsAiLoading(true);
 
     try {
-      const res = await fetch('/api/support/ai-chat', {
+      const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (!openRouterKey) throw new Error('VITE_OPENROUTER_API_KEY is missing');
+
+      const websiteContext = {
+        store: 'Nexus Store digital marketplace',
+        categories: ['Apps', 'Websites', 'Custom Apps', 'Source Code'],
+        paymentDetails,
+        customKnowledge: aiKnowledge,
+        productCatalog: websiteProducts,
+        workflows: [
+          'Users must create an account before adding products to cart or placing an order.',
+          'Orders are placed through checkout after payment proof upload.',
+          'Order history and downloads are available in the user profile.',
+          'Human support is available through Contact Admin for logged-in users; AI support is available to guests.',
+        ],
+      };
+
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: text,
-          userName: userName !== 'Guest User' ? userName : undefined,
-          userEmail: userEmail !== 'guest@nexusstore.com' ? userEmail : undefined,
-          apiKey: aiApiKey,
-          openRouterApiKey,
-          customKnowledge: aiKnowledge,
-          paymentDetails,
-          websiteContext: {
-            store: 'Nexus Store digital marketplace',
-            categories: ['Apps', 'Websites', 'Custom Apps', 'Source Code'],
-            productCatalog: websiteProducts,
-            workflows: [
-              'Users must create an account before adding products to cart or placing an order.',
-              'Orders are placed through checkout after payment proof upload.',
-              'Order history and downloads are available in the user profile.',
-              'Human support is available through Contact Admin for logged-in users; AI support is available to guests.',
-            ],
-          },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${openRouterKey}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Nexus Store AI Assistant',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [
+            { role: 'system', content: `You are Nexus Store AI Support Assistant. Use only this live website data. Never invent products, prices, payment details, or policies.\n${JSON.stringify(websiteContext, null, 2)}` },
+            { role: 'user', content: `${userName !== 'Guest User' ? `Customer name: ${userName}\n` : ''}${text}` },
+          ],
+          max_tokens: 500,
         }),
       });
+      if (!res.ok) {
+        const errorBody = await res.text();
+        throw new Error(`OpenRouter request failed with ${res.status}: ${errorBody}`);
+      }
       const data = await res.json();
 
       const aiReplyMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.reply || "I am glad to help! Feel free to ask more questions or click 'Contact Admin' for human support.",
+        text: data.choices?.[0]?.message?.content || 'AI did not return a response.',
         sender: 'ai',
         senderName: 'Nexus AI',
       };
@@ -238,7 +248,9 @@ export function CustomerSupportChat() {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "I am having trouble connecting right now, but you can click 'Contact Admin' below to reach our team directly!",
+          text: err instanceof Error && err.message.includes('VITE_OPENROUTER_API_KEY')
+            ? 'OpenRouter API key is not configured. Add VITE_OPENROUTER_API_KEY in Netlify and redeploy.'
+            : 'AI service is unavailable. Please try again in a moment.',
           sender: 'ai',
           senderName: 'Nexus AI',
         }

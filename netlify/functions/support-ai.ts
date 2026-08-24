@@ -28,7 +28,7 @@ export default async (event: Event) => {
     if (!body.message || typeof body.message !== "string") return { statusCode: 400, body: JSON.stringify({ error: "Message is required" }) };
     const context = { ...(body.websiteContext || {}), paymentDetails: body.paymentDetails };
     const name = typeof body.userName === "string" ? body.userName : "Valued Customer";
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
 
     if (apiKey && process.env.OPENROUTER_API_KEY) {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
