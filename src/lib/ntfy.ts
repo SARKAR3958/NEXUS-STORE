@@ -4,17 +4,6 @@ export async function sendNtfyNotification(title: string, message: string) {
   const payload = { title, message, priority: "high", tags: ["bell", "nexus"] };
 
   try {
-    const response = await fetch("/api/notifications/ntfy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (response.ok) return true;
-  } catch (error) {
-    console.warn("Ntfy server route unavailable, trying direct delivery:", error);
-  }
-
-  try {
     const response = await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
       method: "POST",
       headers: {

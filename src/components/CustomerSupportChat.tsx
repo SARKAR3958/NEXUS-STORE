@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '../store/authStore';
 import { db } from '../lib/firebase';
 import { 
-  collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc 
+  collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, getDocs 
 } from 'firebase/firestore';
 import { sendNtfyNotification } from '../lib/ntfy';
 
@@ -19,6 +19,17 @@ interface Message {
   sender: 'ai' | 'user' | 'admin';
   senderName?: string;
   timestamp?: any;
+}
+
+interface WebsiteProduct {
+  id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  originalPrice?: number;
+  features?: string[];
+  version?: string;
 }
 
 function formatMessageDateTime(timestamp?: any) {
@@ -71,6 +82,7 @@ export function CustomerSupportChat() {
     paymentAccountTitle: 'SadaPay Digital Official',
     paymentAccountNumber: '03001234567'
   });
+  const [websiteProducts, setWebsiteProducts] = useState<WebsiteProduct[]>([]);
 
   // Firestore messages for Admin mode
   const [adminMessages, setAdminMessages] = useState<Message[]>([]);
@@ -93,7 +105,7 @@ export function CustomerSupportChat() {
   useEffect(() => {
     const loadAiSettings = async () => {
       try {
-        const snap = await getDoc(doc(db, 'system_config', 'admin_settings'));
+        const snap = await getDoc(doc(db, 'public_settings', 'storefront'));
         if (snap.exists()) {
           const data = snap.data();
           if (data.aiAssistantApiKey) setAiApiKey(data.aiAssistantApiKey);
@@ -110,6 +122,31 @@ export function CustomerSupportChat() {
       }
     };
     loadAiSettings();
+  }, []);
+
+  // Keep AI answers aligned with the live Firestore product catalog.
+  useEffect(() => {
+    const loadWebsiteProducts = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'products'));
+        setWebsiteProducts(snapshot.docs.map((productDoc) => {
+          const data = productDoc.data();
+          return {
+            id: productDoc.id,
+            title: data.title || 'Untitled product',
+            description: data.description || '',
+            category: data.category || '',
+            price: typeof data.price === 'number' ? data.price : undefined,
+            originalPrice: typeof data.originalPrice === 'number' ? data.originalPrice : undefined,
+            features: Array.isArray(data.features) ? data.features.filter((feature: unknown): feature is string => typeof feature === 'string') : [],
+            version: data.version || '',
+          };
+        }));
+      } catch (error) {
+        console.warn('Failed to fetch product catalog for AI context:', error);
+      }
+    };
+    loadWebsiteProducts();
   }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -172,6 +209,17 @@ export function CustomerSupportChat() {
           openRouterApiKey,
           customKnowledge: aiKnowledge,
           paymentDetails,
+          websiteContext: {
+            store: 'Nexus Store digital marketplace',
+            categories: ['Apps', 'Websites', 'Custom Apps', 'Source Code'],
+            productCatalog: websiteProducts,
+            workflows: [
+              'Users must create an account before adding products to cart or placing an order.',
+              'Orders are placed through checkout after payment proof upload.',
+              'Order history and downloads are available in the user profile.',
+              'Human support is available through Contact Admin for logged-in users; AI support is available to guests.',
+            ],
+          },
         }),
       });
       const data = await res.json();

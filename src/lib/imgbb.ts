@@ -16,7 +16,7 @@ export async function fetchActiveImgBBApiKey(): Promise<string> {
     return cachedApiKey;
   }
   try {
-    const snap = await getDoc(doc(db, "system_config", "admin_settings"));
+    const snap = await getDoc(doc(db, "public_settings", "storefront"));
     if (snap.exists()) {
       const data = snap.data();
       if (data.imgbbApiKey && typeof data.imgbbApiKey === "string" && data.imgbbApiKey.trim().length > 0) {

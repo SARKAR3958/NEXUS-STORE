@@ -113,6 +113,11 @@ export function AdminSettings() {
         updatedBy: auth.currentUser?.email || "admin",
       }, { merge: true });
 
+      await setDoc(doc(db, "public_settings", "storefront"), {
+        aiCustomKnowledge: aiCustomKnowledge.trim(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+
       setStatusMessage({
         type: "success",
         text: "AI Assistant configuration saved! Store AI chatbot will now use your API Key(s) & custom store training.",
@@ -183,6 +188,16 @@ export function AdminSettings() {
         paymentMethodLogoUrl: paymentMethodLogoUrl.trim(),
         updatedAt: new Date().toISOString(),
         updatedBy: auth.currentUser?.email || "admin",
+      }, { merge: true });
+
+      await setDoc(doc(db, "public_settings", "storefront"), {
+        paymentAccountNumber: paymentAccountNumber.trim(),
+        paymentAccountTitle: paymentAccountTitle.trim(),
+        paymentMethodName: paymentMethodName.trim(),
+        paymentMethodLogoText: paymentMethodLogoText.trim() || "Sada",
+        paymentMethodLogoUrl: paymentMethodLogoUrl.trim(),
+        aiCustomKnowledge: aiCustomKnowledge.trim(),
+        updatedAt: new Date().toISOString(),
       }, { merge: true });
 
       setStatusMessage({

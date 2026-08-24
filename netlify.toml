@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/support/ai-chat"
+  to = "/.netlify/functions/support-ai"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/forgot-password"
+  to = "/.netlify/functions/forgot-password"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/verify-reset-token"
+  to = "/.netlify/functions/verify-reset-token"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/email-preview"
+  to = "/.netlify/functions/email-preview"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

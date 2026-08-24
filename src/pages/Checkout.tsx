@@ -45,7 +45,7 @@ export function Checkout() {
   useEffect(() => {
     const fetchPaymentSettings = async () => {
       try {
-        const docSnap = await getDoc(doc(db, "system_config", "admin_settings"));
+        const docSnap = await getDoc(doc(db, "public_settings", "storefront"));
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.paymentAccountTitle) setAccountTitle(data.paymentAccountTitle);

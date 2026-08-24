@@ -59,7 +59,7 @@ async function startServer() {
   // Support AI Assistant Endpoint
   app.post('/api/support/ai-chat', async (req, res) => {
     try {
-      const { message, userName, userEmail, apiKey, openRouterApiKey, customKnowledge, paymentDetails } = req.body;
+      const { message, userName, userEmail, apiKey, openRouterApiKey, customKnowledge, paymentDetails, websiteContext } = req.body;
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Message is required' });
       }
@@ -94,7 +94,17 @@ Store Knowledge & Guidelines:
 6. Support: If the user needs direct human support or complex refund/account help, politely advise them to click 'Contact Admin' in the chat window.
 
 Custom Admin Rules:
-${customKnowledge || "Provide polite, concise, helpful assistance."}`;
+${customKnowledge || "Provide polite, concise, helpful assistance."}
+
+Live Nexus Store Website Data:
+${JSON.stringify(websiteContext || {
+  store: 'Nexus Store digital marketplace',
+  categories: ['Apps', 'Websites', 'Custom Apps', 'Source Code'],
+  productCatalog: [],
+  workflows: [],
+}, null, 2)}
+
+Use the live website data above as the source of truth for product names, categories, prices, features, checkout requirements, and store workflows. Never invent a product, price, payment detail, or policy when the data does not contain it. If information is missing, say so clearly and direct the customer to Contact Admin.`;
 
       const getFallbackReply = (msg: string) => {
         const lower = msg.toLowerCase().trim();
